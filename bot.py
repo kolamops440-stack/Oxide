@@ -16,7 +16,7 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, InputMedia
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 # ========== КОНФИГ ==========
-BOT_TOKEN = "8614807346:AAFhTgIEGVEIj3q2UTOxkeIIvBisn47TUdc"
+BOT_TOKEN = "8694266621:AAGP095HsZGAwumUUF63uDnBYvzcpuh_20k"
 ADMIN_ID = 7496589494
 CRYPTO_BOT_TOKEN = "560372:AAyQpvWZFSHpzrnVAhVwPF7PbcJmqI7bH0K"
 UAH_CARD = "4441111008011946"
