@@ -14,6 +14,7 @@ from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton, InputMediaPhoto
 from aiogram.utils.keyboard import InlineKeyboardBuilder
+from aiogram.exceptions import TelegramBadRequest
 
 # ========== КОНФИГ ==========
 BOT_TOKEN = "8694266621:AAGP095HsZGAwumUUF63uDnBYvzcpuh_20k"
@@ -47,6 +48,86 @@ PERIODS = {
     "Lebro_Lite": [("24 часа", "24h")],
     "Lebro_VIP": [("24 часа", "24h"), ("7 дней", "7d"), ("30 дней", "30d")],
     "Plutonium": [("7 дней", "7d"), ("30 дней", "30d"), ("90 дней", "90d")],
+}
+
+# ========== ID Telegram Premium эмодзи ==========
+PREMIUM_EMOJI = {
+    "playcheat": "5931409969613116639",
+    "star": "5805532930662996322",
+    "catalog": "5208513917965328345",
+    "profile": "5886412370347036129",
+    "purchases": "5983399041197675256",
+    "oxide": "5312048193444282508",
+    "standoff": "5819078828017849357",
+    "back_main": "5877629862306385808",
+    "lebro_vip": "5208422125924275090",
+    "lebro_lite": "5208422125924275090",
+    "period": "5985596818912712352",
+    "crypto": "5361914370068613491",
+    "uah": "5805532930662996322",
+    "back_periods": "5877629862306385808",
+    "invoice": "5983399041197675256",
+    "sum": "5208513917965328345",
+    "product": "5877260593903177342",
+    "link": "5877465816030515018",
+    "check": "6005843436479975944",
+    "cancel": "5985346521103604145",
+    "card": "5208431570557360595",
+    "receipt": "6050592962730005028",
+    "receipt_sent": "5985596818912712352",
+    "confirmed": "5985596818912712352",
+    "your_key": "6005570495603282482",
+    "thanks": "5985596818912712352",
+    "user_id": "5886505193180239900",
+    "username": "5771887475421090729",
+    "name": "5897962422169243693",
+    "active_key": "6005570495603282482",
+    "expires": "5897962422169243693",
+    "game_select": "5960551395730919906",
+    "lebroname": "5877260593903177342",
+    "to_pay": "5983399041197675256",
+    "back_game": "5877629862306385808",
+    "agree": "5985346521103604145",
+}
+
+# Обычные эмодзи (для пользователей без Premium)
+NORMAL_EMOJI = {
+    "playcheat": "🛡️",
+    "star": "⭐",
+    "catalog": "🛍️",
+    "profile": "👤",
+    "purchases": "📦",
+    "oxide": "🔥",
+    "standoff": "💥",
+    "back_main": "🔙",
+    "lebro_vip": "💎",
+    "lebro_lite": "📱",
+    "period": "⏱️",
+    "crypto": "💸",
+    "uah": "🇺🇦",
+    "back_periods": "🔙",
+    "invoice": "📄",
+    "sum": "💰",
+    "product": "📦",
+    "link": "🔗",
+    "check": "🔄",
+    "cancel": "❌",
+    "card": "💳",
+    "receipt": "📸",
+    "receipt_sent": "✅",
+    "confirmed": "✅",
+    "your_key": "🔑",
+    "thanks": "🎉",
+    "user_id": "🆔",
+    "username": "📛",
+    "name": "👤",
+    "active_key": "🔑",
+    "expires": "⏳",
+    "game_select": "📋",
+    "lebroname": "📦",
+    "to_pay": "💸",
+    "back_game": "🔙",
+    "agree": "✅",
 }
 
 # ========== ДАННЫЕ ==========
@@ -83,89 +164,105 @@ class States(StatesGroup):
     selecting_period = State()
     selecting_payment = State()
 
-# ========== ФУНКЦИЯ ДЛЯ ЭМОДЗИ ==========
-def emoji(emoji_id: str) -> str:
-    return f'<tg-emoji emoji-id="{emoji_id}"> </tg-emoji>'
+# ========== ФУНКЦИИ ДЛЯ ПРОВЕРКИ PREMIUM ==========
 
-def make_premium_button(text: str, callback_data: str, emoji_id: str = None):
-    if emoji_id:
-        return InlineKeyboardButton(text=f'{emoji(emoji_id)}{text}', callback_data=callback_data)
+async def is_premium_user(user_id: int) -> bool:
+    """Проверяет есть ли у пользователя Telegram Premium"""
+    try:
+        user = await bot.get_chat(user_id)
+        return user.premium_until_date is not None if hasattr(user, 'premium_until_date') else False
+    except:
+        return False
+
+def get_emoji(user_is_premium: bool, emoji_key: str) -> str:
+    """Возвращает эмодзи в зависимости от наличия Premium"""
+    if user_is_premium:
+        return f'<tg-emoji emoji-id="{PREMIUM_EMOJI[emoji_key]}"> </tg-emoji>'
+    return NORMAL_EMOJI.get(emoji_key, "")
+
+def make_button(user_is_premium: bool, text: str, callback_data: str, emoji_key: str = None):
+    """Создает кнопку с эмодзи (Premium или обычное)"""
+    if emoji_key:
+        if user_is_premium:
+            text = f'<tg-emoji emoji-id="{PREMIUM_EMOJI[emoji_key]}"> </tg-emoji>{text}'
+        else:
+            text = f'{NORMAL_EMOJI.get(emoji_key, "")} {text}'
     return InlineKeyboardButton(text=text, callback_data=callback_data)
 
 # ========== КЛАВИАТУРЫ ==========
 
-def agreement_keyboard():
+def agreement_keyboard(user_is_premium: bool):
     return InlineKeyboardMarkup(inline_keyboard=[
-        [make_premium_button("Я ознакомлен с правилами", "agree", "5985346521103604145")]
+        [make_button(user_is_premium, "Я ознакомлен с правилами", "agree", "agree")]
     ])
 
-def main_menu_keyboard(is_admin=False):
+def main_menu_keyboard(user_is_premium: bool, is_admin=False):
     buttons = [
         [
-            make_premium_button("Каталог", "menu_catalog", "5208513917965328345"),
-            make_premium_button("Профиль", "menu_profile", "5886412370347036129")
+            make_button(user_is_premium, "Каталог", "menu_catalog", "catalog"),
+            make_button(user_is_premium, "Профиль", "menu_profile", "profile")
         ],
         [
-            make_premium_button("Мои покупки", "menu_purchases", "5983399041197675256")
+            make_button(user_is_premium, "Мои покупки", "menu_purchases", "purchases")
         ]
     ]
     if is_admin:
         buttons.append([InlineKeyboardButton(text="🔧 Админ-панель", callback_data="menu_admin")])
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
-def admin_panel_keyboard():
+def admin_panel_keyboard(user_is_premium: bool):
     return InlineKeyboardMarkup(inline_keyboard=[
         [InlineKeyboardButton(text="🔑 Выдать ключ пользователю", callback_data="admin_give_key")],
-        [make_premium_button("Подтвердить UAH оплату", "admin_confirm_uah", "5805532930662996322")],
-        [make_premium_button("Подтвердить CRYPTO оплату", "admin_confirm_crypto", "5361914370068613491")],
-        [make_premium_button("В главное меню", "back_to_main", "5877629862306385808")]
+        [make_button(user_is_premium, "Подтвердить UAH оплату", "admin_confirm_uah", "uah")],
+        [make_button(user_is_premium, "Подтвердить CRYPTO оплату", "admin_confirm_crypto", "crypto")],
+        [make_button(user_is_premium, "В главное меню", "back_to_main", "back_main")]
     ])
 
-def catalog_keyboard():
+def catalog_keyboard(user_is_premium: bool):
     return InlineKeyboardMarkup(inline_keyboard=[
-        [make_premium_button("Oxide Survival Island", "game_oxide", "5312048193444282508")],
-        [make_premium_button("Standoff 2", "game_standoff", "5819078828017849357")],
-        [make_premium_button("В главное меню", "back_to_main", "5877629862306385808")]
+        [make_button(user_is_premium, "Oxide Survival Island", "game_oxide", "oxide")],
+        [make_button(user_is_premium, "Standoff 2", "game_standoff", "standoff")],
+        [make_button(user_is_premium, "В главное меню", "back_to_main", "back_main")]
     ])
 
-def products_keyboard(game):
+def products_keyboard(user_is_premium: bool, game: str):
     buttons = []
     if game == "oxide":
-        buttons.append([make_premium_button("Lebro [VIP]", "product_Lebro_VIP", "5208422125924275090")])
-        buttons.append([make_premium_button("Lebro [Lite]", "product_Lebro_Lite", "5208422125924275090")])
+        buttons.append([make_button(user_is_premium, "Lebro [VIP]", "product_Lebro_VIP", "lebro_vip")])
+        buttons.append([make_button(user_is_premium, "Lebro [Lite]", "product_Lebro_Lite", "lebro_lite")])
     else:
-        buttons.append([make_premium_button("Plutonium", "product_Plutonium", None)])
-    buttons.append([make_premium_button("Назад к играм", "back_to_catalog", "5877629862306385808")])
+        buttons.append([make_button(user_is_premium, "Plutonium", "product_Plutonium", None)])
+    buttons.append([make_button(user_is_premium, "Назад к играм", "back_to_catalog", "back_game")])
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
-def periods_keyboard(product):
+def periods_keyboard(user_is_premium: bool, product: str):
     buttons = []
     for name, code in PERIODS[product]:
-        buttons.append([make_premium_button(name, f"period_{code}", "5985596818912712352")])
-    buttons.append([make_premium_button("Назад к продуктам", "back_to_products", "5877629862306385808")])
+        buttons.append([make_button(user_is_premium, name, f"period_{code}", "period")])
+    buttons.append([make_button(user_is_premium, "Назад к продуктам", "back_to_products", "back_game")])
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
-def payment_keyboard():
+def payment_keyboard(user_is_premium: bool):
     return InlineKeyboardMarkup(inline_keyboard=[
-        [make_premium_button("CryptoBot (USDT)", "pay_crypto", "5361914370068613491")],
-        [make_premium_button("Оплата гривной", "pay_uah", "5805532930662996322")],
-        [make_premium_button("Назад к периодам", "back_to_periods", "5877629862306385808")]
+        [make_button(user_is_premium, "CryptoBot (USDT)", "pay_crypto", "crypto")],
+        [make_button(user_is_premium, "Оплата гривной", "pay_uah", "uah")],
+        [make_button(user_is_premium, "Назад к периодам", "back_to_periods", "back_periods")]
     ])
 
-def check_payment_keyboard(invoice_id):
+def check_payment_keyboard(user_is_premium: bool, invoice_id):
     return InlineKeyboardMarkup(inline_keyboard=[
-        [make_premium_button("Проверить оплату", f"check_payment_{invoice_id}", "6005843436479975944")],
-        [make_premium_button("Отмена", "cancel_payment", "5985346521103604145")]
+        [make_button(user_is_premium, "Проверить оплату", f"check_payment_{invoice_id}", "check")],
+        [make_button(user_is_premium, "Отмена", "cancel_payment", "cancel")]
     ])
 
-def cancel_keyboard():
+def cancel_keyboard(user_is_premium: bool):
     return InlineKeyboardMarkup(inline_keyboard=[
-        [make_premium_button("Отмена", "cancel", "5985346521103604145")]
+        [make_button(user_is_premium, "Отмена", "cancel", "cancel")]
     ])
 
-def uah_receipt_keyboard():
+def uah_receipt_keyboard(user_is_premium: bool):
     return InlineKeyboardMarkup(inline_keyboard=[
-        [make_premium_button("Отмена", "cancel", "5985346521103604145")]
+        [make_button(user_is_premium, "Отмена", "cancel", "cancel")]
     ])
 
 # ========== CRYPTOPAY API ==========
@@ -262,8 +359,33 @@ def activate_key(user_id, key, product_name, period):
 
 async def edit_message_with_photo(message, photo_url, caption, reply_markup):
     """Редактирует существующее сообщение с фото"""
-    media = InputMediaPhoto(media=photo_url, caption=caption, parse_mode="HTML")
-    await message.edit_media(media=media, reply_markup=reply_markup)
+    try:
+        media = InputMediaPhoto(media=photo_url, caption=caption, parse_mode="HTML")
+        await message.edit_media(media=media, reply_markup=reply_markup)
+    except TelegramBadRequest as e:
+        if "message to edit not found" in str(e):
+            # Если сообщение не найдено, отправляем новое
+            await bot.send_photo(
+                chat_id=message.chat.id,
+                photo=photo_url,
+                caption=caption,
+                parse_mode="HTML",
+                reply_markup=reply_markup
+            )
+        else:
+            raise
+
+def get_formatted_text(user_is_premium: bool, text_with_keys: str) -> str:
+    """Форматирует текст с заменой ключей на эмодзи"""
+    result = text_with_keys
+    for key, premium_id in PREMIUM_EMOJI.items():
+        placeholder = f"{{{key}}}"
+        if placeholder in result:
+            if user_is_premium:
+                result = result.replace(placeholder, f'<tg-emoji emoji-id="{premium_id}"> </tg-emoji>')
+            else:
+                result = result.replace(placeholder, NORMAL_EMOJI.get(key, ""))
+    return result
 
 # ========== БОТ ==========
 
@@ -280,35 +402,41 @@ async def cmd_start(message: types.Message, state: FSMContext):
     await state.clear()
     register_user(message.from_user.id, message.from_user.username, message.from_user.full_name)
     
+    # Проверяем Premium
+    user_is_premium = await is_premium_user(message.from_user.id)
+    
     if not data["users"][str(message.from_user.id)]["agreed"]:
-        rules = f"""{emoji("5931409969613116639")} <b>Правила PlayCheatGameBot</b>
+        rules_template = """{playcheat} <b>Правила PlayCheatGameBot</b>
 
-{emoji("5985346521103604145")} <b>1. Возврат:</b> Возврата нет — при покупке цифрового товара потеря, неправильное использование никто не компенсирует.
+{agree} <b>1. Возврат:</b> Возврата нет — при покупке цифрового товара потеря, неправильное использование никто не компенсирует.
 
-{emoji("5985346521103604145")} <b>2. Ответственность:</b> Исполнитель не несёт ответственности за последствия применения.
+{agree} <b>2. Ответственность:</b> Исполнитель не несёт ответственности за последствия применения.
 
-{emoji("5985346521103604145")} <b>3. Общие:</b> Оплачивая услугу, вы соглашаетесь с данными правилами.
+{agree} <b>3. Общие:</b> Оплачивая услугу, вы соглашаетесь с данными правилами.
 
-{emoji("5985346521103604145")} <b>4. Заключительные:</b> Исполнитель вправе изменять условия.
+{agree} <b>4. Заключительные:</b> Исполнитель вправе изменять условия.
 
-{emoji("5985346521103604145")} Нажмите на кнопку ниже, чтобы продолжить"""
-        await message.answer(rules, parse_mode="HTML", reply_markup=agreement_keyboard())
+{agree} Нажмите на кнопку ниже, чтобы продолжить"""
+        
+        rules = get_formatted_text(user_is_premium, rules_template)
+        await message.answer(rules, parse_mode="HTML", reply_markup=agreement_keyboard(user_is_premium))
         await state.set_state(States.waiting_agreement)
     else:
-        await show_main_menu(message)
+        await show_main_menu(message, user_is_premium)
 
 @dp.callback_query(F.data == "agree")
 async def agree_rules(callback: types.CallbackQuery, state: FSMContext):
     data["users"][str(callback.from_user.id)]["agreed"] = True
     save_data()
     await callback.message.delete()
-    await show_main_menu(callback.message)
+    user_is_premium = await is_premium_user(callback.from_user.id)
+    await show_main_menu(callback.message, user_is_premium)
     await state.clear()
 
-async def show_main_menu(message):
-    text = f"""{emoji("5931409969613116639")} <b>PlayCheatGameBot - Надёжный магазин читов</b>
+async def show_main_menu(message, user_is_premium: bool):
+    text_template = """{playcheat} <b>PlayCheatGameBot - Надёжный магазин читов</b>
 
-{emoji("5805532930662996322")} <b>Почему мы?</b>
+{star} <b>Почему мы?</b>
 • Моментальная выдача после оплаты
 • Работает на всех устройствах (NO ROOT)
 • Анонимная оплата криптовалютой
@@ -317,43 +445,53 @@ async def show_main_menu(message):
 
 <b>Выберите действие:</b>"""
     
+    text = get_formatted_text(user_is_premium, text_template)
+    
     if isinstance(message, types.CallbackQuery):
         msg = message.message
     else:
         msg = message
     
-    await edit_message_with_photo(msg, MENU_PHOTO, text, main_menu_keyboard(is_admin(msg.chat.id)))
+    await edit_message_with_photo(msg, MENU_PHOTO, text, main_menu_keyboard(user_is_premium, is_admin(msg.chat.id)))
 
 # ========== КАТАЛОГ ==========
 
 @dp.callback_query(F.data == "menu_catalog")
 async def menu_catalog(callback: types.CallbackQuery, state: FSMContext):
     await state.clear()
-    text = f"{emoji('5960551395730919906')} <b>Выберите игру:</b>"
-    await edit_message_with_photo(callback.message, CATALOG_PHOTO, text, catalog_keyboard())
+    user_is_premium = await is_premium_user(callback.from_user.id)
+    text_template = "{game_select} <b>Выберите игру:</b>"
+    text = get_formatted_text(user_is_premium, text_template)
+    await edit_message_with_photo(callback.message, CATALOG_PHOTO, text, catalog_keyboard(user_is_premium))
     await callback.answer()
 
 @dp.callback_query(F.data == "game_oxide")
 async def game_oxide(callback: types.CallbackQuery, state: FSMContext):
     await state.update_data(game="oxide", product=None, period=None)
-    text = f"{emoji('5819078828017849357')} <b>Oxide Survival Island - Выберите софт:</b>"
-    await edit_message_with_photo(callback.message, GAME_SELECT_PHOTO, text, products_keyboard("oxide"))
+    user_is_premium = await is_premium_user(callback.from_user.id)
+    text_template = "{standoff} <b>Oxide Survival Island - Выберите софт:</b>"
+    text = get_formatted_text(user_is_premium, text_template)
+    await edit_message_with_photo(callback.message, GAME_SELECT_PHOTO, text, products_keyboard(user_is_premium, "oxide"))
     await callback.answer()
 
 @dp.callback_query(F.data == "game_standoff")
 async def game_standoff(callback: types.CallbackQuery, state: FSMContext):
     await state.update_data(game="standoff", product=None, period=None)
-    text = f"{emoji('5819078828017849357')} <b>Standoff 2 - Выберите софт:</b>"
-    await edit_message_with_photo(callback.message, GAME_SELECT_PHOTO, text, products_keyboard("standoff"))
+    user_is_premium = await is_premium_user(callback.from_user.id)
+    text_template = "{standoff} <b>Standoff 2 - Выберите софт:</b>"
+    text = get_formatted_text(user_is_premium, text_template)
+    await edit_message_with_photo(callback.message, GAME_SELECT_PHOTO, text, products_keyboard(user_is_premium, "standoff"))
     await callback.answer()
 
 @dp.callback_query(F.data.startswith("product_"))
 async def select_product(callback: types.CallbackQuery, state: FSMContext):
     product = callback.data.replace("product_", "")
     await state.update_data(product=product, period=None)
+    user_is_premium = await is_premium_user(callback.from_user.id)
     product_name = PRODUCT_NAMES[product]
-    text = f"{emoji('5877260593903177342')} <b>{product_name}</b>\n\nВыберите период действия:"
-    await edit_message_with_photo(callback.message, SYSTEM_PHOTO, text, periods_keyboard(product))
+    text_template = f"{{lebroname}} <b>{product_name}</b>\n\nВыберите период действия:"
+    text = get_formatted_text(user_is_premium, text_template)
+    await edit_message_with_photo(callback.message, SYSTEM_PHOTO, text, periods_keyboard(user_is_premium, product))
     await callback.answer()
 
 @dp.callback_query(F.data.startswith("period_"))
@@ -365,14 +503,17 @@ async def select_period(callback: types.CallbackQuery, state: FSMContext):
     product = data_state.get("product")
     if not product:
         await callback.answer("Ошибка: выберите товар заново", show_alert=True)
-        await show_main_menu(callback)
+        user_is_premium = await is_premium_user(callback.from_user.id)
+        await show_main_menu(callback, user_is_premium)
         return
     
+    user_is_premium = await is_premium_user(callback.from_user.id)
     price = PRICES[product][period]
     currency = "USDT" if "Lebro" in product else "UAH"
     
-    text = f"{emoji('5983399041197675256')} <b>К оплате: {price} {currency}</b>\n\nВыберите способ оплаты:"
-    await edit_message_with_photo(callback.message, PAYMENT_PHOTO, text, payment_keyboard())
+    text_template = f"{{to_pay}} <b>К оплате: {price} {currency}</b>\n\nВыберите способ оплаты:"
+    text = get_formatted_text(user_is_premium, text_template)
+    await edit_message_with_photo(callback.message, PAYMENT_PHOTO, text, payment_keyboard(user_is_premium))
     await callback.answer()
 
 # ========== CRYPTO ОПЛАТА ==========
@@ -385,17 +526,20 @@ async def pay_crypto(callback: types.CallbackQuery, state: FSMContext):
     
     if not product or not period:
         await callback.answer("Ошибка: выберите товар заново", show_alert=True)
-        await show_main_menu(callback)
+        user_is_premium = await is_premium_user(callback.from_user.id)
+        await show_main_menu(callback, user_is_premium)
         return
     
+    user_is_premium = await is_premium_user(callback.from_user.id)
     product_name = PRODUCT_NAMES[product]
     price = PRICES[product][period]
     
     invoice = await crypto_api.create_invoice(price, "USDT", f"{product_name} {period}")
     
     if not invoice:
-        text = "Ошибка создания счета. Попробуйте позже."
-        await edit_message_with_photo(callback.message, PAYMENT_PHOTO, text, payment_keyboard())
+        text_template = "Ошибка создания счета. Попробуйте позже."
+        text = get_formatted_text(user_is_premium, text_template)
+        await edit_message_with_photo(callback.message, PAYMENT_PHOTO, text, payment_keyboard(user_is_premium))
         await callback.answer()
         return
     
@@ -414,16 +558,17 @@ async def pay_crypto(callback: types.CallbackQuery, state: FSMContext):
     }
     save_data()
     
-    text = f"""{emoji("5983399041197675256")} <b>Создан счет на оплату</b>
+    text_template = f"""{{invoice}} <b>Создан счет на оплату</b>
 
-{emoji("5208513917965328345")} <b>Сумма:</b> {price} USDT
-{emoji("5877260593903177342")} <b>Товар:</b> {product_name} ({period})
+{{sum}} <b>Сумма:</b> {price} USDT
+{{product}} <b>Товар:</b> {product_name} ({period})
 
-{emoji("5877465816030515018")} <b>Ссылка для оплаты:</b> <a href="{pay_url}">Оплатить</a>
+{{link}} <b>Ссылка для оплаты:</b> <a href="{pay_url}">Оплатить</a>
 
-{emoji("6005843436479975944")} После оплаты нажмите кнопку ниже для проверки"""
+{{check}} После оплаты нажмите кнопку ниже для проверки"""
     
-    await edit_message_with_photo(callback.message, PAYMENT_PHOTO, text, check_payment_keyboard(invoice_id))
+    text = get_formatted_text(user_is_premium, text_template)
+    await edit_message_with_photo(callback.message, PAYMENT_PHOTO, text, check_payment_keyboard(user_is_premium, invoice_id))
     await callback.answer()
 
 @dp.callback_query(F.data.startswith("check_payment_"))
@@ -457,13 +602,15 @@ async def check_payment(callback: types.CallbackQuery, state: FSMContext):
             del data["temp_invoices"][str(invoice_id)]
         save_data()
         
-        text = f"""{emoji("5985596818912712352")} <b>Ваша CRYPTO оплата подтверждена!</b>
+        user_is_premium = await is_premium_user(callback.from_user.id)
+        text_template = f"""{{confirmed}} <b>Ваша CRYPTO оплата подтверждена!</b>
 
-{emoji("5208513917965328345")} <b>Товар:</b> {product_name} ({period})
-{emoji("6005570495603282482")} <b>Ваш ключ:</b> <code>{auto_key}</code>
+{{product}} <b>Товар:</b> {product_name} ({period})
+{{your_key}} <b>Ваш ключ:</b> <code>{auto_key}</code>
 
-{emoji("5985596818912712352")} Спасибо за покупку!"""
+{{thanks}} Спасибо за покупку!"""
         
+        text = get_formatted_text(user_is_premium, text_template)
         await edit_message_with_photo(callback.message, PAYMENT_PHOTO, text, None)
         await state.clear()
         
@@ -475,7 +622,8 @@ async def check_payment(callback: types.CallbackQuery, state: FSMContext):
 @dp.callback_query(F.data == "cancel_payment")
 async def cancel_payment(callback: types.CallbackQuery, state: FSMContext):
     await state.clear()
-    await show_main_menu(callback)
+    user_is_premium = await is_premium_user(callback.from_user.id)
+    await show_main_menu(callback, user_is_premium)
     await callback.answer("Оплата отменена")
 
 # ========== UAH ОПЛАТА ==========
@@ -488,27 +636,30 @@ async def pay_uah(callback: types.CallbackQuery, state: FSMContext):
     
     if not product or not period:
         await callback.answer("Ошибка: выберите товар заново", show_alert=True)
-        await show_main_menu(callback)
+        user_is_premium = await is_premium_user(callback.from_user.id)
+        await show_main_menu(callback, user_is_premium)
         return
     
+    user_is_premium = await is_premium_user(callback.from_user.id)
     product_name = PRODUCT_NAMES[product]
     price = PRICES[product][period]
     
     await state.update_data(uah_product=product, uah_period=period, uah_price=price, uah_product_name=product_name)
     
-    text = f"""{emoji("5985596818912712352")} <b>Оплата гривной</b>
+    text_template = f"""{{period}} <b>Оплата гривной</b>
 
-{emoji("5208513917965328345")} <b>Сумма:</b> {price} грн
-{emoji("5877260593903177342")} <b>Товар:</b> {product_name} ({period})
+{{sum}} <b>Сумма:</b> {price} грн
+{{product}} <b>Товар:</b> {product_name} ({period})
 
-{emoji("5208431570557360595")} <b>Карта для оплаты:</b> <code>{UAH_CARD}</code>
+{{card}} <b>Карта для оплаты:</b> <code>{UAH_CARD}</code>
 ❗ <b>Комментарий:</b> <code>{UAH_COMMENT}</code>
 
-{emoji("6050592962730005028")} <b>После оплаты отправьте скриншот чека сюда</b>
+{{receipt}} <b>После оплаты отправьте скриншот чека сюда</b>
 
-{emoji("5208431570557360595")} Без чека ключ НЕ будет выдан"""
+{{card}} Без чека ключ НЕ будет выдан"""
     
-    await edit_message_with_photo(callback.message, PAYMENT_PHOTO, text, uah_receipt_keyboard())
+    text = get_formatted_text(user_is_premium, text_template)
+    await edit_message_with_photo(callback.message, PAYMENT_PHOTO, text, uah_receipt_keyboard(user_is_premium))
     await state.set_state(States.waiting_uah_receipt)
     await callback.answer()
 
@@ -533,68 +684,76 @@ async def receive_uah_receipt(message: types.Message, state: FSMContext):
     
     await bot.send_photo(ADMIN_ID, photo_id, caption=admin_text, parse_mode="HTML")
     
-    text = f"{emoji('5985596818912712352')} Чек отправлен! Администратор выдаст ключ после проверки."
+    user_is_premium = await is_premium_user(message.from_user.id)
+    text_template = "{receipt_sent} Чек отправлен! Администратор выдаст ключ после проверки."
+    text = get_formatted_text(user_is_premium, text_template)
     await message.answer(text, parse_mode="HTML")
     await state.clear()
-    await show_main_menu(message)
+    await show_main_menu(message, user_is_premium)
 
 # ========== ПРОФИЛЬ ==========
 
 @dp.callback_query(F.data == "menu_profile")
 async def menu_profile(callback: types.CallbackQuery):
+    user_is_premium = await is_premium_user(callback.from_user.id)
     user = data["users"][str(callback.from_user.id)]
     
     active = user.get("active_key") or "Нет активного ключа"
     product = user.get("active_product") or "—"
     expires = user.get("expires_at") or "—"
     
-    text = f"""{emoji("5886412370347036129")} <b>Ваш профиль</b>
+    text_template = f"""{{profile}} <b>Ваш профиль</b>
 
-{emoji("5886505193180239900")} <b>ID:</b> <code>{user['user_id']}</code>
-{emoji("5771887475421090729")} <b>Юзернейм:</b> @{user['username']}
-{emoji("5897962422169243693")} <b>Имя:</b> {user['full_name']}
+{{user_id}} <b>ID:</b> <code>{user['user_id']}</code>
+{{username}} <b>Юзернейм:</b> @{user['username']}
+{{name}} <b>Имя:</b> {user['full_name']}
 
-{emoji("6005570495603282482")} <b>Активный ключ:</b> <code>{active}</code>
-{emoji("5208513917965328345")} <b>Товар:</b> {product}
-{emoji("5897962422169243693")} <b>Срок до:</b> {expires}"""
+{{active_key}} <b>Активный ключ:</b> <code>{active}</code>
+{{product}} <b>Товар:</b> {product}
+{{expires}} <b>Срок до:</b> {expires}"""
     
-    await edit_message_with_photo(callback.message, MENU_PHOTO, text, main_menu_keyboard(is_admin(callback.from_user.id)))
+    text = get_formatted_text(user_is_premium, text_template)
+    await edit_message_with_photo(callback.message, MENU_PHOTO, text, main_menu_keyboard(user_is_premium, is_admin(callback.from_user.id)))
     await callback.answer()
 
 # ========== МОИ ПОКУПКИ ==========
 
 @dp.callback_query(F.data == "menu_purchases")
 async def menu_purchases(callback: types.CallbackQuery):
+    user_is_premium = await is_premium_user(callback.from_user.id)
     purchases = data["users"][str(callback.from_user.id)].get("purchases", [])
     
     if not purchases:
         text = "📭 <b>У вас пока нет покупок</b>"
     else:
-        text = f"{emoji('5983399041197675256')} <b>ИСТОРИЯ ПОКУПОК:</b>\n\n"
+        text_template = "{purchases} <b>ИСТОРИЯ ПОКУПОК:</b>\n\n"
+        text = get_formatted_text(user_is_premium, text_template)
         for i, p in enumerate(reversed(purchases[-10:]), 1):
             status_emoji = "✅" if p['status'] == 'active' else "⏳"
             text += f"{i}. {status_emoji} <b>{p['product']}</b>\n   Период: {p['period']}\n   Цена: {p['price']} {p['currency']}\n   Ключ: <code>{p['key']}</code>\n   Дата: {p['purchased_at']}\n\n"
     
-    await edit_message_with_photo(callback.message, MENU_PHOTO, text, main_menu_keyboard(is_admin(callback.from_user.id)))
+    await edit_message_with_photo(callback.message, MENU_PHOTO, text, main_menu_keyboard(user_is_premium, is_admin(callback.from_user.id)))
     await callback.answer()
 
-# ========== АДМИН ПАНЕЛЬ ==========
+# ========== АДМИН ПАНЕЛЬ (упрощенно) ==========
 
 @dp.callback_query(F.data == "menu_admin")
 async def menu_admin(callback: types.CallbackQuery):
     if not is_admin(callback.from_user.id):
         await callback.answer("Доступ запрещен", show_alert=True)
         return
+    user_is_premium = await is_premium_user(callback.from_user.id)
     text = "🔧 <b>Админ-панель</b>"
-    await edit_message_with_photo(callback.message, MENU_PHOTO, text, admin_panel_keyboard())
+    await edit_message_with_photo(callback.message, MENU_PHOTO, text, admin_panel_keyboard(user_is_premium))
     await callback.answer()
 
 @dp.callback_query(F.data == "admin_give_key")
 async def admin_give_key(callback: types.CallbackQuery, state: FSMContext):
     if not is_admin(callback.from_user.id):
         return
+    user_is_premium = await is_premium_user(callback.from_user.id)
     text = "✏️ <b>Введите ID пользователя:</b>"
-    await edit_message_with_photo(callback.message, MENU_PHOTO, text, cancel_keyboard())
+    await edit_message_with_photo(callback.message, MENU_PHOTO, text, cancel_keyboard(user_is_premium))
     await state.set_state(States.admin_waiting_user_id)
     await callback.answer()
 
@@ -607,6 +766,7 @@ async def admin_confirm_uah(callback: types.CallbackQuery, state: FSMContext):
         await callback.answer("Нет ожидающих UAH оплат!", show_alert=True)
         return
     
+    user_is_premium = await is_premium_user(callback.from_user.id)
     builder = InlineKeyboardBuilder()
     for pid, info in data["pending_uah"].items():
         builder.button(text=f"✅ {info['username']} - {info['product']} ({info['price']} грн)", callback_data=f"confirm_uah_{pid}")
@@ -629,10 +789,11 @@ async def confirm_uah_payment(callback: types.CallbackQuery, state: FSMContext):
         await callback.answer("Уже обработано!", show_alert=True)
         return
     
+    user_is_premium = await is_premium_user(callback.from_user.id)
     await state.update_data(pending_id=pending_id, user_id=pending["user_id"], product_name=pending["product"], period=pending["period"])
     
     text = f"✏️ <b>Введите ключ для пользователя @{pending['username']}</b>\n\nТовар: {pending['product']} ({pending['period']})"
-    await edit_message_with_photo(callback.message, MENU_PHOTO, text, cancel_keyboard())
+    await edit_message_with_photo(callback.message, MENU_PHOTO, text, cancel_keyboard(user_is_premium))
     await state.set_state(States.admin_waiting_uah_key)
     await callback.answer()
 
@@ -645,7 +806,8 @@ async def get_user_id(message: types.Message, state: FSMContext):
             await state.clear()
             return
         await state.update_data(target_user=user_id)
-        await message.answer("Введите ключ:", reply_markup=cancel_keyboard())
+        user_is_premium = await is_premium_user(message.from_user.id)
+        await message.answer("Введите ключ:", reply_markup=cancel_keyboard(user_is_premium))
         await state.set_state(States.admin_waiting_key)
     except:
         await message.answer("Введите корректный ID!")
@@ -688,22 +850,27 @@ async def send_uah_key(message: types.Message, state: FSMContext):
 @dp.callback_query(F.data == "back_to_main")
 async def back_to_main(callback: types.CallbackQuery, state: FSMContext):
     await state.clear()
-    await show_main_menu(callback)
+    user_is_premium = await is_premium_user(callback.from_user.id)
+    await show_main_menu(callback, user_is_premium)
     await callback.answer()
 
 @dp.callback_query(F.data == "back_to_catalog")
 async def back_to_catalog(callback: types.CallbackQuery, state: FSMContext):
     await state.clear()
-    text = f"{emoji('5960551395730919906')} <b>Выберите игру:</b>"
-    await edit_message_with_photo(callback.message, CATALOG_PHOTO, text, catalog_keyboard())
+    user_is_premium = await is_premium_user(callback.from_user.id)
+    text_template = "{game_select} <b>Выберите игру:</b>"
+    text = get_formatted_text(user_is_premium, text_template)
+    await edit_message_with_photo(callback.message, CATALOG_PHOTO, text, catalog_keyboard(user_is_premium))
     await callback.answer()
 
 @dp.callback_query(F.data == "back_to_products")
 async def back_to_products(callback: types.CallbackQuery, state: FSMContext):
     data_state = await state.get_data()
     game = data_state.get("game", "oxide")
-    text = f"{emoji('5819078828017849357')} <b>{'Oxide Survival Island' if game == 'oxide' else 'Standoff 2'} - Выберите софт:</b>"
-    await edit_message_with_photo(callback.message, GAME_SELECT_PHOTO, text, products_keyboard(game))
+    user_is_premium = await is_premium_user(callback.from_user.id)
+    text_template = f"{{standoff}} <b>{'Oxide Survival Island' if game == 'oxide' else 'Standoff 2'} - Выберите софт:</b>"
+    text = get_formatted_text(user_is_premium, text_template)
+    await edit_message_with_photo(callback.message, GAME_SELECT_PHOTO, text, products_keyboard(user_is_premium, game))
     await callback.answer()
 
 @dp.callback_query(F.data == "back_to_periods")
@@ -711,23 +878,26 @@ async def back_to_periods(callback: types.CallbackQuery, state: FSMContext):
     data_state = await state.get_data()
     product = data_state.get("product")
     if not product:
-        await show_main_menu(callback)
+        user_is_premium = await is_premium_user(callback.from_user.id)
+        await show_main_menu(callback, user_is_premium)
         return
+    user_is_premium = await is_premium_user(callback.from_user.id)
     product_name = PRODUCT_NAMES[product]
-    text = f"{emoji('5877260593903177342')} <b>{product_name}</b>\n\nВыберите период:"
-    await edit_message_with_photo(callback.message, PERIOD_PHOTO, text, periods_keyboard(product))
+    text_template = f"{{lebroname}} <b>{product_name}</b>\n\nВыберите период:"
+    text = get_formatted_text(user_is_premium, text_template)
+    await edit_message_with_photo(callback.message, PERIOD_PHOTO, text, periods_keyboard(user_is_premium, product))
     await callback.answer()
 
 @dp.callback_query(F.data == "cancel")
 async def cancel_action(callback: types.CallbackQuery, state: FSMContext):
     await state.clear()
-    await show_main_menu(callback)
+    user_is_premium = await is_premium_user(callback.from_user.id)
+    await show_main_menu(callback, user_is_premium)
     await callback.answer()
 
 # ========== ЗАПУСК ==========
 
 async def main():
-    # Удаляем вебхук встроенным методом бота
     await bot.delete_webhook(drop_pending_updates=True)
     
     print("✅ Бот запущен!")
