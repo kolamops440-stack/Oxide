@@ -10,7 +10,7 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.types import KeyboardButton, InlineKeyboardButton
-# Импортируем билдеры, как у тебя на скриншоте
+# Використовуємо круті Білдери, як у твоєму прикладі!
 from aiogram.utils.keyboard import ReplyKeyboardBuilder, InlineKeyboardBuilder
 
 # ========== CONFIG ==========
@@ -57,63 +57,63 @@ class States(StatesGroup):
     admin_waiting_user_id = State()
     admin_waiting_key = State()
 
-# ========== КЛАВИАТУРЫ ЧЕРЕЗ BUILDER (ПО ТВОЕМУ ПРИМЕРУ) ==========
+# ========== КЛАВИАТУРЫ ЧЕРЕЗ BUILDER (РАБОТАЮТ НА СТАНДАРТНОМ AIOGRAM) ==========
 
 def main_menu_keyboard():
     builder = InlineKeyboardBuilder()
-    builder.add(InlineKeyboardButton(text="Каталог", callback_data="menu_catalog", style="primary", icon_custom_emoji_id="5208513917965328345"))
-    builder.add(InlineKeyboardButton(text="Профиль", callback_data="menu_profile", style="primary", icon_custom_emoji_id="5886412370347036129"))
-    builder.add(InlineKeyboardButton(text="Мои покупки", callback_data="menu_purchases", style="success", icon_custom_emoji_id="5983399041197675256"))
-    builder.adjust(2, 1) # Сетка кнопок: 2 в первом ряду, 1 во втором
+    builder.add(InlineKeyboardButton(text="📁 Каталог", callback_data="menu_catalog"))
+    builder.add(InlineKeyboardButton(text="👤 Профиль", callback_data="menu_profile"))
+    builder.add(InlineKeyboardButton(text="🛍 Мои покупки", callback_data="menu_purchases"))
+    builder.adjust(2, 1) # Красивая сетка: 2 кнопки в ряд, потом 1
     return builder.as_markup()
 
 def admin_panel_keyboard():
     builder = InlineKeyboardBuilder()
-    builder.add(InlineKeyboardButton(text="Выдать ключ", callback_data="admin_give_key", style="primary", icon_custom_emoji_id="5208422125924275090"))
-    builder.add(InlineKeyboardButton(text="Подтвердить UAH", callback_data="admin_confirm_uah", style="success", icon_custom_emoji_id="5805532930662996322"))
-    builder.add(InlineKeyboardButton(text="В главное меню", callback_data="back_to_main", style="danger", icon_custom_emoji_id="5877629862306385808"))
+    builder.add(InlineKeyboardButton(text="🔑 Выдать ключ", callback_data="admin_give_key"))
+    builder.add(InlineKeyboardButton(text="💳 Подтвердить UAH", callback_data="admin_confirm_uah"))
+    builder.add(InlineKeyboardButton(text="🔙 В главное меню", callback_data="back_to_main"))
     builder.adjust(1)
     return builder.as_markup()
 
 def catalog_keyboard():
     builder = InlineKeyboardBuilder()
-    builder.add(InlineKeyboardButton(text="Oxide Survival Island", callback_data="game_oxide", style="primary", icon_custom_emoji_id="5312048193444282508"))
-    builder.add(InlineKeyboardButton(text="В главное меню", callback_data="back_to_main", style="danger", icon_custom_emoji_id="5877629862306385808"))
+    builder.add(InlineKeyboardButton(text="🎮 Oxide Survival Island", callback_data="game_oxide"))
+    builder.add(InlineKeyboardButton(text="🔙 В главное меню", callback_data="back_to_main"))
     builder.adjust(1)
     return builder.as_markup()
 
 def products_keyboard():
     builder = InlineKeyboardBuilder()
-    builder.add(InlineKeyboardButton(text="Lebro [VIP]", callback_data="product_Lebro_VIP", style="success", icon_custom_emoji_id="5208422125924275090"))
-    builder.add(InlineKeyboardButton(text="Lebro [Lite]", callback_data="product_Lebro_Lite", style="primary", icon_custom_emoji_id="5208422125924275090"))
-    builder.add(InlineKeyboardButton(text="Назад к играм", callback_data="back_to_catalog", style="danger", icon_custom_emoji_id="5877629862306385808"))
+    builder.add(InlineKeyboardButton(text="🔥 Lebro [VIP]", callback_data="product_Lebro_VIP"))
+    builder.add(InlineKeyboardButton(text="⚡ Lebro [Lite]", callback_data="product_Lebro_Lite"))
+    builder.add(InlineKeyboardButton(text="🔙 Назад к играм", callback_data="back_to_catalog"))
     builder.adjust(2, 1)
     return builder.as_markup()
 
 def periods_keyboard(product):
     builder = InlineKeyboardBuilder()
     for name, code in PERIODS[product]:
-        builder.add(InlineKeyboardButton(text=name, callback_data=f"period_{code}", style="primary", icon_custom_emoji_id="5985596818912712352"))
-    builder.add(InlineKeyboardButton(text="Назад к продуктам", callback_data="back_to_products", style="danger", icon_custom_emoji_id="5877629862306385808"))
+        builder.add(InlineKeyboardButton(text=f"⏳ {name}", callback_data=f"period_{code}"))
+    builder.add(InlineKeyboardButton(text="🔙 Назад к продуктам", callback_data="back_to_products"))
     builder.adjust(1)
     return builder.as_markup()
 
 def payment_keyboard():
     builder = InlineKeyboardBuilder()
-    builder.add(InlineKeyboardButton(text="CryptoBot (USDT)", callback_data="pay_crypto", style="success", icon_custom_emoji_id="5361914370068613491"))
-    builder.add(InlineKeyboardButton(text="Оплата гривной", callback_data="pay_uah", style="primary", icon_custom_emoji_id="5805532930662996322"))
-    builder.add(InlineKeyboardButton(text="Назад к периодам", callback_data="back_to_periods", style="danger", icon_custom_emoji_id="5877629862306385808"))
+    builder.add(InlineKeyboardButton(text="🤖 CryptoBot (USDT)", callback_data="pay_crypto"))
+    builder.add(InlineKeyboardButton(text="🇺🇦 Оплата гривной", callback_data="pay_uah"))
+    builder.add(InlineKeyboardButton(text="🔙 Назад к периодам", callback_data="back_to_periods"))
     builder.adjust(1)
     return builder.as_markup()
 
 def cancel_keyboard():
     builder = InlineKeyboardBuilder()
-    builder.add(InlineKeyboardButton(text="Отмена", callback_data="cancel", style="danger", icon_custom_emoji_id="5985346521103604145"))
+    builder.add(InlineKeyboardButton(text="❌ Отмена", callback_data="cancel"))
     return builder.as_markup()
 
 def agreement_keyboard():
     builder = InlineKeyboardBuilder()
-    builder.add(InlineKeyboardButton(text="Я ознакомлен с правилами", callback_data="agree", style="success", icon_custom_emoji_id="5985346521103604145"))
+    builder.add(InlineKeyboardButton(text="✅ Я ознакомлен с правилами", callback_data="agree"))
     return builder.as_markup()
 
 # ========== ФУНКЦИИ УПРАВЛЕНИЯ ПОЛЬЗОВАТЕЛЯМИ ==========
@@ -166,17 +166,14 @@ async def cmd_start(message: types.Message, state: FSMContext):
     register_user(message.from_user.id, message.from_user.username, message.from_user.full_name)
     
     if not data["users"][str(message.from_user.id)]["agreed"]:
-        rules = """<tg-emoji emoji-id="5931409969613116639"> </tg-emoji> <b>Правила PlayCheatGameBot</b>
+        rules = """📋 <b>Правила PlayCheatGameBot</b>
 
-<tg-emoji emoji-id="5985346521103604145"> </tg-emoji> <b>1. Возврат:</b> Возврата нет
+⚠️ <b>1. Возврат:</b> Возврата нет
+🔒 <b>2. Ответственность:</b> Не несём ответственности
+🤝 <b>3. Общие:</b> Оплачивая услугу, вы соглашаетесь
+📝 <b>4. Заключительные:</b> Условия могут меняться
 
-<tg-emoji emoji-id="5985346521103604145"> </tg-emoji> <b>2. Ответственность:</b> Не несём ответственности
-
-<tg-emoji emoji-id="5985346521103604145"> </tg-emoji> <b>3. Общие:</b> Оплачивая услугу, вы соглашаетесь
-
-<tg-emoji emoji-id="5985346521103604145"> </tg-emoji> <b>4. Заключительные:</b> Условия могут меняться
-
-<tg-emoji emoji-id="5985346521103604145"> </tg-emoji> Нажмите на кнопку ниже"""
+Нажмите на кнопку ниже, чтобы продолжить:"""
         
         await message.answer(rules, parse_mode="HTML", reply_markup=agreement_keyboard())
         await state.set_state(States.waiting_agreement)
@@ -192,16 +189,16 @@ async def agree_rules(callback: types.CallbackQuery, state: FSMContext):
     await state.clear()
 
 async def show_main_menu(message):
-    text = """<tg-emoji emoji-id="5931409969613116639"> </tg-emoji> <b>PlayCheatGameBot - Надёжный магазин читов</b>
+    text = """🏪 <b>PlayCheatGameBot - Надёжный магазин читов</b>
 
-<tg-emoji emoji-id="5805532930662996322"> </tg-emoji> <b>Почему мы?</b>
+💎 <b>Почему мы?</b>
 • Моментальная выдача после оплаты
 • Работает на всех устройствах (NO ROOT)
 • Анонимная оплата криптовалютой
 • 24/7 поддержка
 • Проверенные софты
 
-<b>Выберите действие:</b>"""
+<b>Выберите действие в меню ниже:</b>"""
     
     msg = message.message if isinstance(message, types.CallbackQuery) else message
     
@@ -215,14 +212,14 @@ async def show_main_menu(message):
 @dp.callback_query(F.data == "menu_catalog")
 async def menu_catalog(callback: types.CallbackQuery, state: FSMContext):
     await state.clear()
-    text = "<tg-emoji emoji-id=\"5960551395730919906\"> </tg-emoji> <b>Выберите игру:</b>"
+    text = "🎯 <b>Выберите игру:</b>"
     await callback.message.edit_text(text, parse_mode="HTML", reply_markup=catalog_keyboard())
     await callback.answer()
 
 @dp.callback_query(F.data == "game_oxide")
 async def game_oxide(callback: types.CallbackQuery, state: FSMContext):
     await state.update_data(game="oxide")
-    text = "<tg-emoji emoji-id=\"5819078828017849357\"> </tg-emoji> <b>Oxide Survival Island - Выберите софт:</b>"
+    text = "🚀 <b>Oxide Survival Island - Выберите софт:</b>"
     await callback.message.edit_text(text, parse_mode="HTML", reply_markup=products_keyboard())
     await callback.answer()
 
@@ -231,7 +228,7 @@ async def select_product(callback: types.CallbackQuery, state: FSMContext):
     product = callback.data.replace("product_", "")
     await state.update_data(product=product)
     product_name = PRODUCT_NAMES[product]
-    text = f"<tg-emoji emoji-id=\"5877260593903177342\"> </tg-emoji> <b>{product_name}</b>\n\nВыберите период действия:"
+    text = f"📦 <b>{product_name}</b>\n\nВыберите период действия:"
     await callback.message.edit_text(text, parse_mode="HTML", reply_markup=periods_keyboard(product))
     await callback.answer()
 
@@ -244,7 +241,7 @@ async def select_period(callback: types.CallbackQuery, state: FSMContext):
     product = data_state.get("product")
     price = PRICES[product][period]
     
-    text = f"<tg-emoji emoji-id=\"5983399041197675256\"> </tg-emoji> <b>К оплате: {price} USDT</b>\n\nВыберите способ оплаты:"
+    text = f"💰 <b>К оплате: {price} USDT</b>\n\nВыберите способ оплаты:"
     await callback.message.edit_text(text, parse_mode="HTML", reply_markup=payment_keyboard())
     await callback.answer()
 
@@ -261,25 +258,25 @@ async def pay_crypto(callback: types.CallbackQuery, state: FSMContext):
     auto_key = f"DEMO-{product_name[:4].upper()}-{period.upper()}-{random.randint(1000, 9999)}"
     add_purchase(callback.from_user.id, product_name, period, price, auto_key)
     
-    text = f"""<tg-emoji emoji-id="5983399041197675256"> </tg-emoji> <b>Оплата прошла успешно!</b>
+    text = f"""✅ <b>Оплата прошла успешно!</b>
 
-<tg-emoji emoji-id="5208513917965328345"> </tg-emoji> <b>Сумма:</b> {price} USDT
-<tg-emoji emoji-id="5877260593903177342"> </tg-emoji> <b>Товар:</b> {product_name} ({period})
-<tg-emoji emoji-id="6005570495603282482"> </tg-emoji> <b>Ваш ключ:</b> <code>{auto_key}</code>
+💵 <b>Сумма:</b> {price} USDT
+📦 <b>Товар:</b> {product_name} ({period})
+🔑 <b>Ваш ключ:</b> <code>{auto_key}</code>
 
-<tg-emoji emoji-id="5985596818912712352"> </tg-emoji> Спасибо за покупку!"""
+✨ Спасибо за покупку!"""
     
     await callback.message.edit_text(text, parse_mode="HTML")
     await callback.answer()
 
 @dp.callback_query(F.data == "pay_uah")
 async def pay_uah(callback: types.CallbackQuery, state: FSMContext):
-    text = f"""<tg-emoji emoji-id="5985596818912712352"> </tg-emoji> <b>Оплата гривной</b>
+    text = f"""💳 <b>Оплата гривной</b>
 
-<tg-emoji emoji-id="5208431570557360595"> </tg-emoji> <b>Карта:</b> <code>{UAH_CARD}</code>
+📌 <b>Карта:</b> <code>{UAH_CARD}</code>
 ❗ <b>Комментарий:</b> <code>{UAH_COMMENT}</code>
 
-<tg-emoji emoji-id="6050592962730005028"> </tg-emoji> <b>После оплаты отправьте скриншот чека</b>"""
+🧾 <b>После оплаты отправьте скриншот чека в этот чат!</b>"""
     
     await callback.message.edit_text(text, parse_mode="HTML", reply_markup=cancel_keyboard())
     await state.set_state(States.waiting_uah_receipt)
@@ -308,7 +305,7 @@ async def receive_uah_receipt(message: types.Message, state: FSMContext):
     admin_text = f"🔔 НОВАЯ ОПЛАТА UAH\n\n👤 @{message.from_user.username or 'Нет'} (ID: {user_id})\n📦 {PRODUCT_NAMES[product]} ({period})\n💰 {price} UAH"
     await bot.send_photo(ADMIN_ID, photo_id, caption=admin_text, parse_mode="HTML")
     
-    text = "<tg-emoji emoji-id=\"5985596818912712352\"> </tg-emoji> Чек отправлен! Администратор выдаст ключ после проверки."
+    text = "📩 Чек отправлен! Администратор выдаст ключ после проверки оплат."
     await message.answer(text, parse_mode="HTML")
     await state.clear()
     await show_main_menu(message)
@@ -322,15 +319,15 @@ async def menu_profile(callback: types.CallbackQuery):
     product = user.get("active_product") or "—"
     expires = user.get("expires_at") or "—"
     
-    text = f"""<tg-emoji emoji-id="5886412370347036129"> </tg-emoji> <b>Ваш профиль</b>
+    text = f"""👤 <b>Ваш профиль</b>
 
-<tg-emoji emoji-id="5886505193180239900"> </tg-emoji> <b>ID:</b> <code>{user['user_id']}</code>
-<tg-emoji emoji-id="5771887475421090729"> </tg-emoji> <b>Юзернейм:</b> @{user['username']}
-<tg-emoji emoji-id="5897962422169243693"> </tg-emoji> <b>Имя:</b> {user['full_name']}
+🆔 <b>ID:</b> <code>{user['user_id']}</code>
+🌐 <b>Юзернейм:</b> @{user['username']}
+📝 <b>Имя:</b> {user['full_name']}
 
-<tg-emoji emoji-id="6005570495603282482"> </tg-emoji> <b>Active Key:</b> <code>{active}</code>
-<tg-emoji emoji-id="5208513917965328345"> </tg-emoji> <b>Товар:</b> {product}
-<tg-emoji emoji-id="5897962422169243693"> </tg-emoji> <b>Срок до:</b> {expires}"""
+🔑 <b>Активный ключ:</b> <code>{active}</code>
+📦 <b>Товар:</b> {product}
+⏳ <b>Срок до:</b> {expires}"""
     
     await callback.message.edit_text(text, parse_mode="HTML", reply_markup=main_menu_keyboard())
     await callback.answer()
@@ -342,7 +339,7 @@ async def menu_purchases(callback: types.CallbackQuery):
     if not purchases:
         text = "📭 <b>У вас пока нет покупок</b>"
     else:
-        text = "<tg-emoji emoji-id=\"5983399041197675256\"> </tg-emoji> <b>ИСТОРИЯ ПОКУПОК:</b>\n\n"
+        text = "🛍 <b>История ваших покупок:</b>\n\n"
         for i, p in enumerate(reversed(purchases[-10:]), 1):
             status_emoji = "✅" if p['status'] == 'active' else "⏳"
             text += f"{i}. {status_emoji} <b>{p['product']}</b>\n   Период: {p['period']}\n   Цена: {p['price']} {p['currency']}\n   Ключ: <code>{p['key']}</code>\n   Дата: {p['purchased_at']}\n\n"
@@ -410,7 +407,7 @@ async def send_key(message: types.Message, state: FSMContext):
         save_data()
     
     try:
-        await bot.send_message(user_id, f"<tg-emoji emoji-id=\"5985596818912712352\"> </tg-emoji> <b>Вам выдан ключ!</b>\n\n🔑 Ключ: <code>{key}</code>", parse_mode="HTML")
+        await bot.send_message(user_id, f"🎉 <b>Вам выдан ключ!</b>\n\n🔑 Ключ: <code>{key}</code>", parse_mode="HTML")
         await message.answer(f"✅ Ключ отправлен пользователю {user_id}!")
     except Exception:
         await message.answer(f"⚠️ Ошибка отправки пользователю.\n\nКлюч: <code>{key}</code>", parse_mode="HTML")
@@ -465,12 +462,12 @@ async def back_to_main(callback: types.CallbackQuery, state: FSMContext):
 @dp.callback_query(F.data == "back_to_catalog")
 async def back_to_catalog(callback: types.CallbackQuery, state: FSMContext):
     await state.clear()
-    await callback.message.edit_text("<tg-emoji emoji-id=\"5960551395730919906\"> </tg-emoji> <b>Выберите игру:</b>", parse_mode="HTML", reply_markup=catalog_keyboard())
+    await callback.message.edit_text("🎯 <b>Выберите игру:</b>", parse_mode="HTML", reply_markup=catalog_keyboard())
     await callback.answer()
 
 @dp.callback_query(F.data == "back_to_products")
 async def back_to_products(callback: types.CallbackQuery, state: FSMContext):
-    await callback.message.edit_text("<tg-emoji emoji-id=\"5819078828017849357\"> </tg-emoji> <b>Oxide Survival Island - Выберите софт:</b>", parse_mode="HTML", reply_markup=products_keyboard())
+    await callback.message.edit_text("🚀 <b>Oxide Survival Island - Выберите софт:</b>", parse_mode="HTML", reply_markup=products_keyboard())
     await callback.answer()
 
 @dp.callback_query(F.data == "back_to_periods")
@@ -481,7 +478,7 @@ async def back_to_periods(callback: types.CallbackQuery, state: FSMContext):
         await show_main_menu(callback)
         return
     product_name = PRODUCT_NAMES[product]
-    await callback.message.edit_text(f"<tg-emoji emoji-id=\"5877260593903177342\"> </tg-emoji> <b>{product_name}</b>\n\nВыберите период действия:", parse_mode="HTML", reply_markup=periods_keyboard(product))
+    await callback.message.edit_text(f"📦 <b>{product_name}</b>\n\nВыберите период действия:", parse_mode="HTML", reply_markup=periods_keyboard(product))
     await callback.answer()
 
 @dp.callback_query(F.data == "cancel")
@@ -494,10 +491,11 @@ async def cancel_action(callback: types.CallbackQuery, state: FSMContext):
 
 async def main():
     await bot.delete_webhook(drop_pending_updates=True)
-    print("✅ Бот запущен через Билдеры!")
+    print("✅ Бот успешно запущен на стандартном aiogram!")
     print(f"👑 ID Администратора: {ADMIN_ID}")
     print("📦 Ожидание обновлений...")
     await dp.start_polling(bot)
 
 if __name__ == "__main__":
     asyncio.run(main())
+            
