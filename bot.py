@@ -1,5 +1,6 @@
 from aiogram import Bot, Dispatcher, types, F
 from aiogram.filters import Command
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 import asyncio
 
 BOT_TOKEN = "8813471822:AAEWpNtYPJGVtCVeqGO5d4yvrwGOYhffpW8"
@@ -12,26 +13,30 @@ async def start(message: types.Message):
     # Текст с премиум эмодзи
     text = 'Привет, Салфетка и Хабр! <tg-emoji emoji-id="5285430309720966085">👍</tg-emoji>'
     
-    # Инлайн кнопки с премиум эмодзи
-    keyboard = types.InlineKeyboardMarkup(inline_keyboard=[
+    # Инлайн кнопки с icon_custom_emoji_id
+    keyboard = InlineKeyboardMarkup(inline_keyboard=[
         [
-            types.InlineKeyboardButton(
-                text='<tg-emoji emoji-id="5310169226856644648"> </tg-emoji>Опасная кнопка!',
-                callback_data="btn1"
+            InlineKeyboardButton(
+                text="Опасная кнопка!",
+                callback_data="btn1",
+                icon_custom_emoji_id="5310169226856644648"
             ),
-            types.InlineKeyboardButton(
-                text='<tg-emoji emoji-id="5310076249404621168"> </tg-emoji>Успешная кнопка =)',
-                callback_data="btn2"
+            InlineKeyboardButton(
+                text="Успешная кнопка =)",
+                callback_data="btn2",
+                icon_custom_emoji_id="5310076249404621168"
             )
         ],
         [
-            types.InlineKeyboardButton(
-                text='<tg-emoji emoji-id="5285430309720966085"> </tg-emoji>Основная кнопка',
-                callback_data="btn3"
+            InlineKeyboardButton(
+                text="Основная кнопка",
+                callback_data="btn3",
+                icon_custom_emoji_id="5285430309720966085"
             ),
-            types.InlineKeyboardButton(
-                text='<tg-emoji emoji-id="5285032475490273112"> </tg-emoji>Простокнопка -_-',
-                callback_data="btn4"
+            InlineKeyboardButton(
+                text="Простокнопка -_-",
+                callback_data="btn4",
+                icon_custom_emoji_id="5285032475490273112"
             )
         ]
     ])
@@ -40,7 +45,7 @@ async def start(message: types.Message):
 
 @dp.callback_query()
 async def handle_buttons(callback: types.CallbackQuery):
-    await callback.answer(f"Ты нажал: {callback.data}")
+    await callback.answer()
     await callback.message.answer(f"✅ Нажата кнопка: {callback.data}")
 
 async def main():
