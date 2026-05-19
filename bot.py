@@ -9,7 +9,8 @@ from aiogram.filters import Command
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.storage.memory import MemoryStorage
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+from aiogram.types import (ReplyKeyboardMarkup, KeyboardButton, 
+                           InlineKeyboardMarkup, InlineKeyboardButton)
 
 # ========== КОНФИГ ==========
 BOT_TOKEN = "8813471822:AAEWpNtYPJGVtCVeqGO5d4yvrwGOYhffpW8"
@@ -55,92 +56,76 @@ class States(StatesGroup):
     admin_waiting_user_id = State()
     admin_waiting_key = State()
 
-# ========== КЛАВИАТУРЫ С PREMIUM ЭМОДЗИ И СТИЛЯМИ ==========
+# ========== КЛАВИАТУРЫ В ТВОЕМ СТИЛЕ (STYLE + ICON_CUSTOM_EMOJI_ID) ==========
 
 def main_menu_keyboard():
-    btn_catalog = InlineKeyboardButton(text="Каталог", callback_data="menu_catalog").model_copy(
-        update={"style": "primary", "icon_custom_emoji_id": "5208513917965328345"}
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(text="Каталог", callback_data="menu_catalog", style="primary", icon_custom_emoji_id="5208513917965328345"),
+                InlineKeyboardButton(text="Профиль", callback_data="menu_profile", style="primary", icon_custom_emoji_id="5886412370347036129")
+            ],
+            [
+                InlineKeyboardButton(text="Мои покупки", callback_data="menu_purchases", style="success", icon_custom_emoji_id="5983399041197675256")
+            ]
+        ]
     )
-    btn_profile = InlineKeyboardButton(text="Профиль", callback_data="menu_profile").model_copy(
-        update={"style": "primary", "icon_custom_emoji_id": "5886412370347036129"}
-    )
-    btn_purchases = InlineKeyboardButton(text="Мои покупки", callback_data="menu_purchases").model_copy(
-        update={"style": "success", "icon_custom_emoji_id": "5983399041197675256"}
-    )
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [btn_catalog, btn_profile],
-        [btn_purchases]
-    ])
 
 def admin_panel_keyboard():
-    btn_give = InlineKeyboardButton(text="Выдать ключ", callback_data="admin_give_key").model_copy(
-        update={"style": "primary", "icon_custom_emoji_id": "5208422125924275090"}
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="Выдать ключ", callback_data="admin_give_key", style="primary", icon_custom_emoji_id="5208422125924275090")],
+            [InlineKeyboardButton(text="Подтвердить UAH", callback_data="admin_confirm_uah", style="success", icon_custom_emoji_id="5805532930662996322")],
+            [InlineKeyboardButton(text="В главное меню", callback_data="back_to_main", style="danger", icon_custom_emoji_id="5877629862306385808")]
+        ]
     )
-    btn_conf = InlineKeyboardButton(text="Подтвердить UAH", callback_data="admin_confirm_uah").model_copy(
-        update={"style": "success", "icon_custom_emoji_id": "5805532930662996322"}
-    )
-    btn_back = InlineKeyboardButton(text="В главное меню", callback_data="back_to_main").model_copy(
-        update={"style": "danger", "icon_custom_emoji_id": "5877629862306385808"}
-    )
-    return InlineKeyboardMarkup(inline_keyboard=[[btn_give], [btn_conf], [btn_back]])
 
 def catalog_keyboard():
-    btn_game = InlineKeyboardButton(text="Oxide Survival Island", callback_data="game_oxide").model_copy(
-        update={"style": "primary", "icon_custom_emoji_id": "5312048193444282508"}
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="Oxide Survival Island", callback_data="game_oxide", style="primary", icon_custom_emoji_id="5312048193444282508")],
+            [InlineKeyboardButton(text="В главное меню", callback_data="back_to_main", style="danger", icon_custom_emoji_id="5877629862306385808")]
+        ]
     )
-    btn_back = InlineKeyboardButton(text="В главное меню", callback_data="back_to_main").model_copy(
-        update={"style": "danger", "icon_custom_emoji_id": "5877629862306385808"}
-    )
-    return InlineKeyboardMarkup(inline_keyboard=[[btn_game], [btn_back]])
 
 def products_keyboard():
-    btn_vip = InlineKeyboardButton(text="Lebro [VIP]", callback_data="product_Lebro_VIP").model_copy(
-        update={"style": "success", "icon_custom_emoji_id": "5208422125924275090"}
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="Lebro [VIP]", callback_data="product_Lebro_VIP", style="success", icon_custom_emoji_id="5208422125924275090")],
+            [InlineKeyboardButton(text="Lebro [Lite]", callback_data="product_Lebro_Lite", style="primary", icon_custom_emoji_id="5208422125924275090")],
+            [InlineKeyboardButton(text="Назад к играм", callback_data="back_to_catalog", style="danger", icon_custom_emoji_id="5877629862306385808")]
+        ]
     )
-    btn_lite = InlineKeyboardButton(text="Lebro [Lite]", callback_data="product_Lebro_Lite").model_copy(
-        update={"style": "primary", "icon_custom_emoji_id": "5208422125924275090"}
-    )
-    btn_back = InlineKeyboardButton(text="Назад к играм", callback_data="back_to_catalog").model_copy(
-        update={"style": "danger", "icon_custom_emoji_id": "5877629862306385808"}
-    )
-    return InlineKeyboardMarkup(inline_keyboard=[[btn_vip], [btn_lite], [btn_back]])
 
 def periods_keyboard(product):
     buttons = []
     for name, code in PERIODS[product]:
-        btn = InlineKeyboardButton(text=name, callback_data=f"period_{code}").model_copy(
-            update={"style": "primary", "icon_custom_emoji_id": "5985596818912712352"}
-        )
-        buttons.append([btn])
-    btn_back = InlineKeyboardButton(text="Назад к продуктам", callback_data="back_to_products").model_copy(
-        update={"style": "danger", "icon_custom_emoji_id": "5877629862306385808"}
-    )
-    buttons.append([btn_back])
+        buttons.append([InlineKeyboardButton(text=name, callback_data=f"period_{code}", style="primary", icon_custom_emoji_id="5985596818912712352")])
+    buttons.append([InlineKeyboardButton(text="Назад к продуктам", callback_data="back_to_products", style="danger", icon_custom_emoji_id="5877629862306385808")])
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 def payment_keyboard():
-    btn_crypto = InlineKeyboardButton(text="CryptoBot (USDT)", callback_data="pay_crypto").model_copy(
-        update={"style": "success", "icon_custom_emoji_id": "5361914370068613491"}
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="CryptoBot (USDT)", callback_data="pay_crypto", style="success", icon_custom_emoji_id="5361914370068613491")],
+            [InlineKeyboardButton(text="Оплата гривной", callback_data="pay_uah", style="primary", icon_custom_emoji_id="5805532930662996322")],
+            [InlineKeyboardButton(text="Назад к периодам", callback_data="back_to_periods", style="danger", icon_custom_emoji_id="5877629862306385808")]
+        ]
     )
-    btn_uah = InlineKeyboardButton(text="Оплата гривной", callback_data="pay_uah").model_copy(
-        update={"style": "primary", "icon_custom_emoji_id": "5805532930662996322"}
-    )
-    btn_back = InlineKeyboardButton(text="Назад к периодам", callback_data="back_to_periods").model_copy(
-        update={"style": "danger", "icon_custom_emoji_id": "5877629862306385808"}
-    )
-    return InlineKeyboardMarkup(inline_keyboard=[[btn_crypto], [btn_uah], [btn_back]])
 
 def cancel_keyboard():
-    btn_cancel = InlineKeyboardButton(text="Отмена", callback_data="cancel").model_copy(
-        update={"style": "danger", "icon_custom_emoji_id": "5985346521103604145"}
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="Отмена", callback_data="cancel", style="danger", icon_custom_emoji_id="5985346521103604145")]
+        ]
     )
-    return InlineKeyboardMarkup(inline_keyboard=[[btn_cancel]])
 
 def agreement_keyboard():
-    btn_agree = InlineKeyboardButton(text="Я ознакомлен с правилами", callback_data="agree").model_copy(
-        update={"style": "success", "icon_custom_emoji_id": "5985346521103604145"}
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="Я ознакомлен с правилами", callback_data="agree", style="success", icon_custom_emoji_id="5985346521103604145")]
+        ]
     )
-    return InlineKeyboardMarkup(inline_keyboard=[[btn_agree]])
 
 # ========== ФУНКЦИИ УПРАВЛЕНИЯ ПОЛЬЗОВАТЕЛЯМИ ==========
 
