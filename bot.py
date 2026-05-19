@@ -17,7 +17,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.exceptions import TelegramBadRequest
 
 # ========== КОНФИГ ==========
-BOT_TOKEN = "8694266621:AAGP095HsZGAwumUUF63uDnBYvzcpuh_20k"
+BOT_TOKEN = "8813471822:AAEWpNtYPJGVtCVeqGO5d4yvrwGOYhffpW8"
 ADMIN_ID = 7496589494
 CRYPTO_BOT_TOKEN = "560372:AAyQpvWZFSHpzrnVAhVwPF7PbcJmqI7bH0K"
 UAH_CARD = "4441111008011946"
