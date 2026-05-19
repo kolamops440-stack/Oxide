@@ -1,4 +1,4 @@
-import asyncio  # Виправлено регістр
+import asyncio
 import json
 import os
 from datetime import datetime, timedelta
@@ -55,62 +55,63 @@ class States(StatesGroup):
     admin_waiting_user_id = State()
     admin_waiting_key = State()
 
-# ========== КЛАВИАТУРЫ С icon_custom_emoji_id ==========
+# ========== КЛАВИАТУРЫ С PREMIUM ЭМОДЗИ (Через Хак для Telegram API) ==========
+# Щоб aiogram не падав, ми передаємо параметр custom_emoji_id через розпаковку дикта
 
 def main_menu_keyboard():
     buttons = [
         [
-            InlineKeyboardButton(text="Каталог", callback_data="menu_catalog", icon_custom_emoji_id="5208513917965328345"),
-            InlineKeyboardButton(text="Профиль", callback_data="menu_profile", icon_custom_emoji_id="5886412370347036129")
+            InlineKeyboardButton(text="Каталог", callback_data="menu_catalog", **{"custom_emoji_id": "5208513917965328345"}),
+            InlineKeyboardButton(text="Профиль", callback_data="menu_profile", **{"custom_emoji_id": "5886412370347036129"})
         ],
         [
-            InlineKeyboardButton(text="Мои покупки", callback_data="menu_purchases", icon_custom_emoji_id="5983399041197675256")
+            InlineKeyboardButton(text="Мои покупки", callback_data="menu_purchases", **{"custom_emoji_id": "5983399041197675256"})
         ]
     ]
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 def admin_panel_keyboard():
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="Выдать ключ", callback_data="admin_give_key", icon_custom_emoji_id="5208422125924275090")],
-        [InlineKeyboardButton(text="Подтвердить UAH", callback_data="admin_confirm_uah", icon_custom_emoji_id="5805532930662996322")],
-        [InlineKeyboardButton(text="В главное меню", callback_data="back_to_main", icon_custom_emoji_id="5877629862306385808")]
+        [InlineKeyboardButton(text="Выдать ключ", callback_data="admin_give_key", **{"custom_emoji_id": "5208422125924275090"})],
+        [InlineKeyboardButton(text="Подтвердить UAH", callback_data="admin_confirm_uah", **{"custom_emoji_id": "5805532930662996322"})],
+        [InlineKeyboardButton(text="В главное меню", callback_data="back_to_main", **{"custom_emoji_id": "5877629862306385808"})]
     ])
 
 def catalog_keyboard():
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="Oxide Survival Island", callback_data="game_oxide", icon_custom_emoji_id="5312048193444282508")],
-        [InlineKeyboardButton(text="В главное меню", callback_data="back_to_main", icon_custom_emoji_id="5877629862306385808")]
+        [InlineKeyboardButton(text="Oxide Survival Island", callback_data="game_oxide", **{"custom_emoji_id": "5312048193444282508"})],
+        [InlineKeyboardButton(text="В главное меню", callback_data="back_to_main", **{"custom_emoji_id": "5877629862306385808"})]
     ])
 
 def products_keyboard():
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="Lebro [VIP]", callback_data="product_Lebro_VIP", icon_custom_emoji_id="5208422125924275090")],
-        [InlineKeyboardButton(text="Lebro [Lite]", callback_data="product_Lebro_Lite", icon_custom_emoji_id="5208422125924275090")],
-        [InlineKeyboardButton(text="Назад к играм", callback_data="back_to_catalog", icon_custom_emoji_id="5877629862306385808")]
+        [InlineKeyboardButton(text="Lebro [VIP]", callback_data="product_Lebro_VIP", **{"custom_emoji_id": "5208422125924275090"})],
+        [InlineKeyboardButton(text="Lebro [Lite]", callback_data="product_Lebro_Lite", **{"custom_emoji_id": "5208422125924275090"})],
+        [InlineKeyboardButton(text="Назад к играм", callback_data="back_to_catalog", **{"custom_emoji_id": "5877629862306385808"})]
     ])
 
 def periods_keyboard(product):
     buttons = []
     for name, code in PERIODS[product]:
-        buttons.append([InlineKeyboardButton(text=name, callback_data=f"period_{code}", icon_custom_emoji_id="5985596818912712352")])
-    buttons.append([InlineKeyboardButton(text="Назад к продуктам", callback_data="back_to_products", icon_custom_emoji_id="5877629862306385808")])
+        buttons.append([InlineKeyboardButton(text=name, callback_data=f"period_{code}", **{"custom_emoji_id": "5985596818912712352"})])
+    buttons.append([InlineKeyboardButton(text="Назад к продуктам", callback_data="back_to_products", **{"custom_emoji_id": "5877629862306385808"})])
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 def payment_keyboard():
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="CryptoBot (USDT)", callback_data="pay_crypto", icon_custom_emoji_id="5361914370068613491")],
-        [InlineKeyboardButton(text="Оплата гривной", callback_data="pay_uah", icon_custom_emoji_id="5805532930662996322")],
-        [InlineKeyboardButton(text="Назад к периодам", callback_data="back_to_periods", icon_custom_emoji_id="5877629862306385808")]
+        [InlineKeyboardButton(text="CryptoBot (USDT)", callback_data="pay_crypto", **{"custom_emoji_id": "5361914370068613491"})],
+        [InlineKeyboardButton(text="Оплата гривной", callback_data="pay_uah", **{"custom_emoji_id": "5805532930662996322"})],
+        [InlineKeyboardButton(text="Назад к периодам", callback_data="back_to_periods", **{"custom_emoji_id": "5877629862306385808"})]
     ])
 
 def cancel_keyboard():
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="Отмена", callback_data="cancel", icon_custom_emoji_id="5985346521103604145")]
+        [InlineKeyboardButton(text="Отмена", callback_data="cancel", **{"custom_emoji_id": "5985346521103604145"})]
     ])
 
 def agreement_keyboard():
     return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="Я ознакомлен с правилами", callback_data="agree", icon_custom_emoji_id="5985346521103604145")]
+        [InlineKeyboardButton(text="Я ознакомлен с правилами", callback_data="agree", **{"custom_emoji_id": "5985346521103604145"})]
     ])
 
 # ========== ФУНКЦИИ ==========
@@ -332,7 +333,7 @@ async def menu_profile(callback: types.CallbackQuery):
 <tg-emoji emoji-id="5771887475421090729"> </tg-emoji> <b>Юзернейм:</b> @{user['username']}
 <tg-emoji emoji-id="5897962422169243693"> </tg-emoji> <b>Имя:</b> {user['full_name']}
 
-<tg-emoji emoji-id="6005570495603282482"> </tg-emoji> <b>Активный ключ:</b> <code>{active}</code>
+<tg-emoji emoji-id="6005570495603282482"> </tg-emoji> <b>Active Key:</b> <code>{active}</code>
 <tg-emoji emoji-id="5208513917965328345"> </tg-emoji> <b>Товар:</b> {product}
 <tg-emoji emoji-id="5897962422169243693"> </tg-emoji> <b>Срок до:</b> {expires}"""
     
